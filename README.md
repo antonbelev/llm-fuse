@@ -83,7 +83,7 @@ llm-fuse /path/to/repo --git
 
 ```bash
 # Process a GitHub repository using the default branch
-`llm-fuse` --repo https://github.com/user/repo.git
+llm-fuse --repo https://github.com/user/repo.git
 
 # Process a GitLab repository specifying a branch
 llm-fuse --repo https://gitlab.com/user/repo.git --branch develop
