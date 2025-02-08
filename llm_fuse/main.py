@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-LLM Context Aggregator
+llm-fuse
 ----------------------
 A tool to help aggregate source files (or any text files) into one or more output files
 that you can paste into an LLM prompt to provide context. This version supports:
@@ -16,10 +16,10 @@ that you can paste into an LLM prompt to provide context. This version supports:
   
 Usage:
     # Process a local directory (current directory by default)
-    llm_context_aggregator [directory] [--output OUTPUT] [--include REGEX] [--exclude REGEX] [--git]
+    llm-fuse [directory] [--output OUTPUT] [--include REGEX] [--exclude REGEX] [--git]
 
     # Process only JavaScript files in a repository:
-    llm_context_aggregator --repo https://gitlab.com/antonbelev/beblob --include ".*\\.js$"
+    llm-fuse --repo https://gitlab.com/antonbelev/beblob --include ".*\\.js$"
 
 Notes:
   - When using --repo, the repository is cloned into a temporary directory,
@@ -308,7 +308,7 @@ def main():
         description="Aggregate file contents into one or more files for LLM context."
     )
     # Add a version flag
-    parser.add_argument('--version', action='version', version='LLM Context Aggregator 0.1.0')
+    parser.add_argument('--version', action='version', version='llm-fuse 0.1.0')
     
     # Local directory argument (positional) is ignored if --repo is provided.
     parser.add_argument(

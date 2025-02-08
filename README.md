@@ -1,6 +1,6 @@
-# LLM Context Aggregator
+# llm-fuse
 
-LLM Context Aggregator is a command‑line tool designed to help you quickly generate an aggregated text file (or multiple files when chunking is enabled) from numerous files within a repository. This output can then be pasted into a large language model (LLM) prompt to provide context from multiple source files.
+`llm-fuse` is a command‑line tool designed to help you quickly generate an aggregated text file (or multiple files when chunking is enabled) from numerous files within a repository. This output can then be pasted into a large language model (LLM) prompt to provide context from multiple source files.
 
 ## Features
 
@@ -15,8 +15,7 @@ LLM Context Aggregator is a command‑line tool designed to help you quickly gen
 
 ## Installation
 
-
-There are two common ways to install LLM Context Aggregator so that its CLI command is available globally.
+There are two common ways to install `llm-fuse` so that its CLI command is available globally.
 
 ### Option 1: Global Installation with pip
 
@@ -26,7 +25,7 @@ You can install the package globally (or for your user) with pip. Note that if y
 pip3 install --user . 
 ```
 
-This will install the command‑line tool `llm_context_aggregator` into your user’s local bin directory (typically `~/.local/bin`). Make sure that directory is added to your PATH.
+This will install the command‑line tool `llm-fuse` into your user’s local bin directory (typically `~/.local/bin`). Make sure that directory is added to your PATH.
 
 ### Option 2: Installation with pipx (Recommended)
 
@@ -39,14 +38,14 @@ brew install pipx
 brew upgrade pipx
 ```
 
-2. Install LLM Context Aggregator with pipx:
+2. Install `llm-fuse` with pipx:
 
 From the root of your repository, run:
 ```bash
 pipx install .
 ```
 
-pipx will create an isolated environment for the tool and install its CLI command. The command is typically named `llm_context_aggregator` (as defined in the entry point).
+pipx will create an isolated environment for the tool and install its CLI command. The command is typically named `llm-fuse` (as defined in the entry point).
 
 3. Ensure Your PATH is Set Up:
 pipx usually installs commands in `~/.local/bin`. To make sure this directory is in your PATH, add the following line to your shell configuration file (e.g., `~/.zshrc` or `~/.bash_profile`):
@@ -68,26 +67,26 @@ Using pipx is recommended because it keeps the CLI application isolated from you
 
 ```bash
 # Process the current directory and output to output.txt
-llm_context_aggregator
+llm-fuse
 
 # Process a specific directory and only include Python files
-llm_context_aggregator /path/to/repo --include "\.py$"
+llm-fuse /path/to/repo --include "\.py$"
 
 # Exclude test files
-llm_context_aggregator /path/to/repo --exclude "test"
+llm-fuse /path/to/repo --exclude "test"
 
 # Use only Git‑tracked files (if in a Git repository)
-llm_context_aggregator /path/to/repo --git
+llm-fuse /path/to/repo --git
 ```
 
 ### Processing a Remote Repository
 
 ```bash
 # Process a GitHub repository using the default branch
-llm_context_aggregator --repo https://github.com/user/repo.git
+`llm-fuse` --repo https://github.com/user/repo.git
 
 # Process a GitLab repository specifying a branch
-llm_context_aggregator --repo https://gitlab.com/user/repo.git --branch develop
+llm-fuse --repo https://gitlab.com/user/repo.git --branch develop
 ```
 
 ### Enabling Content Chunking
@@ -95,7 +94,7 @@ If you have very large files, you can specify a maximum token threshold using th
 
 ```bash
 # Process a repository and split large files into chunks of 4000 tokens
-llm_context_aggregator /path/to/repo --max-tokens 4000
+llm-fuse /path/to/repo --max-tokens 4000
 ```
 
 The output is written to `output.txt` by default. You can specify a different file name with the `--output` option.
