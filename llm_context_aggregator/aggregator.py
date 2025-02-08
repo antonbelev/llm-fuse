@@ -10,10 +10,9 @@ that you can paste into an LLM prompt to provide context. This version supports:
 - Optional branch specification using --branch
 - Recursive file scanning with include/exclude filtering (via regex)
 - Rough token counting (approx. 1 token per 4 characters)
-- Producing a single output file with a header summary and file headers,
-  rendering file paths relative to the repository (or base directory) root,
-  always prefixed with "./".
-
+- Producing a single output file with a header summary, a file system diagram,
+  and improved per-file sections.
+  
 Usage:
     # Process a local directory (current directory by default)
     llm_context_aggregator [directory] [--output OUTPUT] [--include REGEX] [--exclude REGEX] [--git]
@@ -129,15 +128,58 @@ def process_files(file_paths: List[str]) -> Tuple[List[dict], int]:
             print(f"Skipping file '{file_path}' due to error: {e}")
     return files_data, total_tokens
 
+def build_tree_from_paths(paths: List[str]) -> dict:
+    """
+    Given a list of relative file paths, build a nested dictionary representing
+    the file system tree.
+    Directories are keys with dictionary values; files are keys with a value of None.
+    """
+    tree = {}
+    for path in paths:
+        parts = path.split(os.sep)
+        node = tree
+        for i, part in enumerate(parts):
+            if i == len(parts) - 1:
+                # Last part: a file.
+                node[part] = None
+            else:
+                if part not in node:
+                    node[part] = {}
+                node = node[part]
+    return tree
+
+def render_tree(tree: dict, prefix: str = "") -> List[str]:
+    """
+    Render the tree dictionary into a list of strings representing a tree diagram.
+    Directories are printed first and then files, using Unicode tree drawing characters.
+    """
+    lines = []
+    # Sort: directories first, then files; both alphabetically.
+    keys = sorted(tree.keys(), key=lambda k: (tree[k] is None, k.lower()))
+    for i, key in enumerate(keys):
+        is_last = i == len(keys) - 1
+        connector = "└── " if is_last else "├── "
+        if tree[key] is None:
+            # It's a file.
+            lines.append(prefix + connector + key)
+        else:
+            # It's a directory.
+            lines.append(prefix + connector + key)
+            new_prefix = prefix + ("    " if is_last else "│   ")
+            lines.extend(render_tree(tree[key], new_prefix))
+    return lines
+
 def write_output_file(files_data: List[dict], total_tokens: int, output_path: str,
                       base_dir: str, display_base_dir: Optional[str] = None) -> None:
     """
-    Write the aggregated file content along with a summary header to the specified output file.
-    File paths are rendered relative to the base_dir and always prefixed with "./".
-    If display_base_dir is provided, it will be shown in the header instead of the raw base_dir.
+    Write the aggregated file content along with a summary header and file system diagram
+    to the specified output file. File paths are rendered relative to the base_dir and always
+    prefixed with "./". The display_base_dir is used in the summary header if provided.
+    Additionally, each file section now has an improved header.
     """
     try:
         with open(output_path, 'w', encoding='utf-8') as f:
+            # Write the summary header.
             header = (
                 "LLM Context Aggregation Output\n"
                 "===============================\n"
@@ -146,12 +188,29 @@ def write_output_file(files_data: List[dict], total_tokens: int, output_path: st
                 f"Total approximate tokens: {total_tokens}\n\n"
             )
             f.write(header)
+
+            # Build and write the file system diagram.
+            relative_paths = [os.path.relpath(file_data['path'], base_dir) for file_data in files_data]
+            tree = build_tree_from_paths(relative_paths)
+            diagram_lines = render_tree(tree)
+            f.write("File System Diagram:\n")
+            f.write("---------------------\n")
+            for line in diagram_lines:
+                f.write(line + "\n")
+            f.write("\n")
+
+            # Write each file's content with an improved header.
             for file_data in files_data:
                 rel_path = os.path.relpath(file_data['path'], base_dir)
-                # Ensure the relative path is prefixed with "./" and uses forward slashes.
+                # Always prefix with "./" and use forward slashes.
                 relative_path = "./" + rel_path.replace("\\", "/")
-                separator = f"===== {relative_path} (approx. {file_data['tokens']} tokens) =====\n"
-                f.write(separator)
+                file_header = (
+                    "--------------------------------------------------\n"
+                    f"File: {relative_path}\n"
+                    f"Approx. tokens: {file_data['tokens']}\n"
+                    "--------------------------------------------------\n"
+                )
+                f.write(file_header)
                 f.write(file_data['content'])
                 f.write("\n\n")
         print(f"Output written to: {output_path}")
@@ -276,7 +335,7 @@ def main():
 
     if temp_repo:
         try:
-            # Remove the temporary clone directory (remove the parent directory of base_dir if necessary)
+            # Remove the temporary clone directory (remove the parent directory of base_dir if needed)
             shutil.rmtree(os.path.dirname(base_dir) if base_dir != os.path.abspath(repo_clone_dir) else repo_clone_dir)
             print(f"Cleaned up temporary repository directory: {repo_clone_dir}")
         except Exception as e:
