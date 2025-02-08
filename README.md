@@ -15,15 +15,53 @@ LLM Context Aggregator is a command‑line tool designed to help you quickly gen
 
 ## Installation
 
-Clone the repository and install via pip (or use the provided setup script):
+
+There are two common ways to install LLM Context Aggregator so that its CLI command is available globally.
+
+### Option 1: Global Installation with pip
+
+You can install the package globally (or for your user) with pip. Note that if you use a Homebrew‑managed Python on macOS, you might encounter restrictions installing system‑wide packages. To install for your user, run:
 
 ```bash
-git clone https://github.com/antonbelev/llm_context_aggregator
-cd llm-context-aggregator
-pip3 install .
-``` 
+pip3 install --user . 
+```
 
-This will install the command‑line tool `llm_context_aggregator` so that you can run it from anywhere.
+This will install the command‑line tool `llm_context_aggregator` into your user’s local bin directory (typically `~/.local/bin`). Make sure that directory is added to your PATH.
+
+### Option 2: Installation with pipx (Recommended)
+
+pipx allows you to install and run Python CLI applications in isolated environments without interfering with your system Python. This is especially useful if you want the command to be available globally without activating a virtual environment.
+
+1. Install pipx (if not already installed):
+
+```bash
+brew install pipx
+brew upgrade pipx
+```
+
+2. Install LLM Context Aggregator with pipx:
+
+From the root of your repository, run:
+```bash
+pipx install .
+```
+
+pipx will create an isolated environment for the tool and install its CLI command. The command is typically named `llm_context_aggregator` (as defined in the entry point).
+
+3. Ensure Your PATH is Set Up:
+pipx usually installs commands in `~/.local/bin`. To make sure this directory is in your PATH, add the following line to your shell configuration file (e.g., `~/.zshrc` or `~/.bash_profile`):
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Then reload your shell:
+
+```bash
+source ~/.zshrc
+```
+
+Using pipx is recommended because it keeps the CLI application isolated from your system packages while still making the command available globally.
 
 ## Usage
 ### Processing a Local Directory

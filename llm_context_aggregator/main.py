@@ -307,6 +307,9 @@ def main():
     parser = argparse.ArgumentParser(
         description="Aggregate file contents into one or more files for LLM context."
     )
+    # Add a version flag
+    parser.add_argument('--version', action='version', version='LLM Context Aggregator 0.1.0')
+    
     # Local directory argument (positional) is ignored if --repo is provided.
     parser.add_argument(
         "directory",
