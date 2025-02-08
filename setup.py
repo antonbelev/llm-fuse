@@ -11,7 +11,7 @@ setuptools.setup(
     description="A tool to aggregate repository files into a single prompt for LLMs.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/llm-context-aggregator",
+    url="https://github.com/antonbelev/llm_context_aggregator",
     packages=setuptools.find_packages(),
     entry_points={
         "console_scripts": [
