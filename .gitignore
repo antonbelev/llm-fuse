@@ -18,5 +18,5 @@ dist/
 .idea/
 .vscode/
 
-
-output.txt
+# Output files 
+output*
