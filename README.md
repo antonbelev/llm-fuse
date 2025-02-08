@@ -103,5 +103,12 @@ The output is written to `output.txt` by default. You can specify a different fi
 ## Contributing
 Contributions are welcome! Feel free to open issues or submit pull requests.
 
+## Local Development
+
+To run the unit tests:
+```bash
+python3 -m unittest discover -s tests
+```
+
 ## License
 This project is licensed under the MIT License. See the LICENSE file for details.

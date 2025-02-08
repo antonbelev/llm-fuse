@@ -223,7 +223,7 @@ def write_output_files(files_data: List[dict], total_tokens: int, output_path: s
                 # Only group 1 gets the summary header and file system diagram.
                 if chunk_index == 1:
                     header = (
-                        "LLM Context Aggregation Output\n"
+                        "LLM Fuse Aggregation Output\n"
                         "===============================\n"
                         f"Base directory: {display_base_dir if display_base_dir is not None else base_dir}\n"
                         f"Total files (or chunks) processed: {len(files_data)}\n"
