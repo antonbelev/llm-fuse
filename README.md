@@ -22,7 +22,18 @@ llm-fuse --git --repo https://github.com/antonbelev/llm-fuse
 
 ## Installation
 
-There are two common ways to install `llm-fuse` so that its CLI command is available globally.
+To install `llm-fuse` globally, follow these steps:
+
+1. Clone the Repository:
+Open your terminal and run:
+```bash
+git clone https://github.com/antonbelev/llm-fuse.git
+cd llm-fuse
+```
+
+2. Choose an Installation Method
+
+You can install `llm-fuse` using one of the following methods:
 
 ### Option 1: Global Installation with pip
 
