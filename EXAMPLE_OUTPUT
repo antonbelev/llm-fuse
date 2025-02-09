@@ -1,0 +1,828 @@
+LLM Context Aggregation Output
+===============================
+Base directory: ./llm-fuse
+Total files (or chunks) processed: 9
+Total approximate tokens: 7430
+
+File System Diagram:
+---------------------
+├── .github
+│   └── workflows
+│       └── ci.yml
+├── llm_fuse
+│   ├── __init__.py
+│   └── main.py
+├── tests
+│   └── test_llm_fuse.py
+├── .gitignore
+├── LICENSE
+├── README.md
+├── requirements.txt
+└── setup.py
+
+--------------------------------------------------
+File: ./.github/workflows/ci.yml
+Approx. tokens: 152
+--------------------------------------------------
+name: Python package
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.13]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Upgrade pip and install package
+      run: |
+        python -m pip install --upgrade pip
+        pip install .
+
+    - name: Run tests
+      run: |
+        python -m unittest discover -s tests
+
+
+--------------------------------------------------
+File: ./.gitignore
+Approx. tokens: 59
+--------------------------------------------------
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+.env
+.venv
+venv/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg-info
+
+# Editor directories and files
+.idea/
+.vscode/
+
+# Output files 
+output*
+
+--------------------------------------------------
+File: ./LICENSE
+Approx. tokens: 267
+--------------------------------------------------
+MIT License
+
+Copyright (c) 2025 Anton Belev
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+--------------------------------------------------
+File: ./README.md
+Approx. tokens: 1106
+--------------------------------------------------
+# llm-fuse
+
+`llm-fuse` is a command‑line tool designed to help you quickly generate an aggregated text file (or multiple files when chunking is enabled) from numerous files within a repository. This output can then be pasted into a large language model (LLM) prompt to provide context from multiple source files.
+
+## Features
+
+- **Local Directory Scanning:** Recursively scan a local directory for files.
+- **Git‑tracked Files Option:** Optionally limit scanning to Git‑tracked files.
+- **Remote Repository Cloning:** Clone and process a Git repository from GitHub, GitLab, or any other Git‑based service.
+- **File Filtering:** Include or exclude files using regular expressions.
+- **Token Counting:** Roughly estimate token counts (approx. 1 token per 4 characters) for each file.
+- **Aggregated Output:** Generates a primary output file with a summary header, file system diagram, and individual file sections.
+- **Content Chunking:** Automatically splits file content into manageable chunks if it exceeds a specified maximum token threshold (via the `--max-tokens` option). The primary output file (group 1) includes the summary and file tree, while additional chunks are written to separate output files.
+
+
+## Installation
+
+There are two common ways to install `llm-fuse` so that its CLI command is available globally.
+
+### Option 1: Global Installation with pip
+
+You can install the package globally (or for your user) with pip. Note that if you use a Homebrew‑managed Python on macOS, you might encounter restrictions installing system‑wide packages. To install for your user, run:
+
+```bash
+pip3 install --user . 
+```
+
+This will install the command‑line tool `llm-fuse` into your user’s local bin directory (typically `~/.local/bin`). Make sure that directory is added to your PATH.
+
+### Option 2: Installation with pipx (Recommended)
+
+pipx allows you to install and run Python CLI applications in isolated environments without interfering with your system Python. This is especially useful if you want the command to be available globally without activating a virtual environment.
+
+1. Install pipx (if not already installed):
+
+```bash
+brew install pipx
+brew upgrade pipx
+```
+
+2. Install `llm-fuse` with pipx:
+
+From the root of your repository, run:
+```bash
+pipx install .
+```
+
+pipx will create an isolated environment for the tool and install its CLI command. The command is typically named `llm-fuse` (as defined in the entry point).
+
+3. Ensure Your PATH is Set Up:
+pipx usually installs commands in `~/.local/bin`. To make sure this directory is in your PATH, add the following line to your shell configuration file (e.g., `~/.zshrc` or `~/.bash_profile`):
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Then reload your shell:
+
+```bash
+source ~/.zshrc
+```
+
+Using pipx is recommended because it keeps the CLI application isolated from your system packages while still making the command available globally.
+
+## Usage
+### Processing a Local Directory
+
+```bash
+# Process the current directory and output to output.txt
+llm-fuse
+
+# Process a specific directory and only include Python files
+llm-fuse /path/to/repo --include "\.py$"
+
+# Exclude test files
+llm-fuse /path/to/repo --exclude "test"
+
+# Use only Git‑tracked files (if in a Git repository)
+llm-fuse /path/to/repo --git
+```
+
+### Processing a Remote Repository
+
+```bash
+# Process a GitHub repository using the default branch
+llm-fuse --repo https://github.com/user/repo.git
+
+# Process a GitLab repository specifying a branch
+llm-fuse --repo https://gitlab.com/user/repo.git --branch develop
+```
+
+### Enabling Content Chunking
+If you have very large files, you can specify a maximum token threshold using the --max-tokens option. Files exceeding this threshold will be split into chunks, with additional output files created for subsequent chunks (only the primary output file includes the summary header and file system diagram).
+
+```bash
+# Process a repository and split large files into chunks of 4000 tokens
+llm-fuse /path/to/repo --max-tokens 4000
+```
+
+The output is written to `output.txt` by default. You can specify a different file name with the `--output` option.
+
+
+## Contributing
+Contributions are welcome! Feel free to open issues or submit pull requests.
+
+## Local Development
+
+To run the unit tests:
+```bash
+python3 -m unittest discover -s tests
+```
+
+## License
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+--------------------------------------------------
+File: ./llm_fuse/__init__.py
+Approx. tokens: 5
+--------------------------------------------------
+# Empty __init__.py
+
+
+--------------------------------------------------
+File: ./llm_fuse/main.py
+Approx. tokens: 4269
+--------------------------------------------------
+#!/usr/bin/env python3
+"""
+llm-fuse
+----------------------
+A tool to help aggregate source files (or any text files) into one or more output files
+that you can paste into an LLM prompt to provide context. This version supports:
+
+- Scanning a local directory (or only Git-tracked files via --git)
+- Cloning a remote Git repository (GitHub, GitLab, etc.) via URL with --repo
+- Optional branch specification using --branch
+- Recursive file scanning with include/exclude filtering (via regex)
+- Rough token counting (approx. 1 token per 4 characters)
+- Automatic chunking of file content if it exceeds a specified token threshold (--max-tokens)
+- Producing one aggregated output file with a header summary and file system diagram
+  for all non-chunked and first-chunk content, plus separate output files for subsequent chunks.
+  
+Usage:
+    # Process a local directory (current directory by default)
+    llm-fuse [directory] [--output OUTPUT] [--include REGEX] [--exclude REGEX] [--git]
+
+    # Process only JavaScript files in a repository:
+    llm-fuse --repo https://gitlab.com/antonbelev/beblob --include ".*\\.js$"
+
+Notes:
+  - When using --repo, the repository is cloned into a temporary directory,
+    processed, and then removed after generating the output files.
+  - In the aggregated output file, file paths are rendered relative to the repository root,
+    always prefixed with "./" (e.g. "./webpack.config.js", "./src/js/main.js").
+  - The token count is estimated using a simple heuristic of 1 token per 4 characters.
+  - Files exceeding the --max-tokens threshold are split into manageable chunks.
+  - Only the first output file (group 1) includes the summary and file system diagram.
+"""
+
+import os
+import re
+import math
+import argparse
+import subprocess
+import tempfile
+import shutil
+import sys
+from typing import List, Tuple, Optional
+
+def approximate_token_count(text: str) -> int:
+    """
+    Estimate the token count using a simple heuristic: roughly one token per 4 characters.
+    """
+    return math.ceil(len(text) / 4)
+
+def is_text_file(file_path: str) -> bool:
+    """
+    Attempt to read a small portion of the file with UTF-8 encoding.
+    If successful, assume it is a text file; otherwise skip binary or unreadable files.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            f.read(1024)
+        return True
+    except Exception:
+        return False
+
+def get_git_tracked_files(directory: str) -> Optional[List[str]]:
+    """
+    If the directory is a Git repository, use 'git ls-files' to return a list of tracked files.
+    Returns None if there is an error (or if it isn’t a git repo).
+    """
+    try:
+        output = subprocess.check_output(
+            ["git", "ls-files"],
+            cwd=directory,
+            text=True
+        )
+        files = output.splitlines()
+        return files
+    except Exception:
+        return None
+
+def collect_files(directory: str, include_regex: Optional[str],
+                  exclude_regex: Optional[str], git_only: bool) -> List[str]:
+    """
+    Collect a list of file paths based on the provided options.
+    If git_only is True and the directory is a git repository, only Git-tracked files are considered.
+    Otherwise, all files under the directory (recursively) are considered.
+    Filtering via include/exclude regex is applied on the full file path.
+    """
+    file_paths = []
+    if git_only:
+        git_files = get_git_tracked_files(directory)
+        if git_files:
+            # git ls-files returns paths relative to the repo root.
+            file_paths = [os.path.join(directory, f) for f in git_files]
+        else:
+            print("Warning: Not a Git repository or unable to retrieve Git files. Falling back to a full directory scan.")
+    if not file_paths:
+        for root, _, files in os.walk(directory):
+            for file in files:
+                file_paths.append(os.path.join(root, file))
+    # Apply include/exclude filters if specified
+    filtered_paths = []
+    for path in file_paths:
+        if include_regex and not re.search(include_regex, path):
+            continue
+        if exclude_regex and re.search(exclude_regex, path):
+            continue
+        filtered_paths.append(path)
+    return filtered_paths
+
+def process_files(file_paths: List[str], max_tokens: Optional[int] = None) -> Tuple[List[dict], int]:
+    """
+    Process the list of files. For each file determined to be a text file,
+    read its content and compute its approximate token count.
+    If max_tokens is provided and the file's token count exceeds this threshold,
+    split the content into chunks.
+    
+    Returns a list of dictionaries (each containing file path, content, tokens, and, if chunked,
+    chunk index/total chunks) and the total token count.
+    """
+    files_data = []
+    total_tokens = 0
+    for file_path in file_paths:
+        if not is_text_file(file_path):
+            continue
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            tokens = approximate_token_count(content)
+            if max_tokens is not None and tokens > max_tokens:
+                # Estimate maximum characters per chunk (approximation: 1 token ≈ 4 characters)
+                max_chars = max_tokens * 4
+                chunks = [content[i:i+max_chars] for i in range(0, len(content), max_chars)]
+                for idx, chunk in enumerate(chunks):
+                    tokens_chunk = approximate_token_count(chunk)
+                    total_tokens += tokens_chunk
+                    files_data.append({
+                        "path": file_path,
+                        "content": chunk,
+                        "tokens": tokens_chunk,
+                        "chunk_index": idx + 1,
+                        "total_chunks": len(chunks)
+                    })
+            else:
+                total_tokens += tokens
+                files_data.append({
+                    "path": file_path,
+                    "content": content,
+                    "tokens": tokens
+                })
+        except Exception as e:
+            print(f"Skipping file '{file_path}' due to error: {e}")
+    return files_data, total_tokens
+
+def build_tree_from_paths(paths: List[str]) -> dict:
+    """
+    Given a list of relative file paths, build a nested dictionary representing
+    the file system tree.
+    Directories are keys with dictionary values; files are keys with a value of None.
+    """
+    tree = {}
+    for path in paths:
+        parts = path.split(os.sep)
+        node = tree
+        for i, part in enumerate(parts):
+            if i == len(parts) - 1:
+                # Last part: a file.
+                node[part] = None
+            else:
+                if part not in node:
+                    node[part] = {}
+                node = node[part]
+    return tree
+
+def render_tree(tree: dict, prefix: str = "") -> List[str]:
+    """
+    Render the tree dictionary into a list of strings representing a tree diagram.
+    Directories are printed first and then files, using Unicode tree drawing characters.
+    """
+    lines = []
+    # Sort: directories first, then files; both alphabetically.
+    keys = sorted(tree.keys(), key=lambda k: (tree[k] is None, k.lower()))
+    for i, key in enumerate(keys):
+        is_last = i == len(keys) - 1
+        connector = "└── " if is_last else "├── "
+        if tree[key] is None:
+            # It's a file.
+            lines.append(prefix + connector + key)
+        else:
+            # It's a directory.
+            lines.append(prefix + connector + key)
+            new_prefix = prefix + ("    " if is_last else "│   ")
+            lines.extend(render_tree(tree[key], new_prefix))
+    return lines
+
+def write_output_files(files_data: List[dict], total_tokens: int, output_path: str,
+                       base_dir: str, display_base_dir: Optional[str] = None) -> None:
+    """
+    Write the aggregated content to one or more output files.
+    
+    - All file sections that are non-chunked or are the first chunk (chunk_index == 1)
+      are grouped together into the main output file (using the provided output_path).
+      This file includes a summary header and file system diagram.
+      
+    - For file sections with chunk_index > 1, they are grouped by chunk index and
+      written to separate output files (named by appending _<chunk_index> to the base name).
+    """
+    # Group the file sections by chunk index; treat missing 'chunk_index' as 1.
+    groups = {}
+    for file_data in files_data:
+        chunk = file_data.get("chunk_index", 1)
+        groups.setdefault(chunk, []).append(file_data)
+    
+    # Process each group in ascending order.
+    for chunk_index in sorted(groups.keys()):
+        group = groups[chunk_index]
+        # Determine output file name.
+        if chunk_index == 1:
+            out_file = output_path
+        else:
+            base, ext = os.path.splitext(output_path)
+            out_file = f"{base}_{chunk_index}{ext}"
+        
+        try:
+            with open(out_file, 'w', encoding='utf-8') as f:
+                # Only group 1 gets the summary header and file system diagram.
+                if chunk_index == 1:
+                    header = (
+                        "LLM Fuse Aggregation Output\n"
+                        "===============================\n"
+                        f"Base directory: {display_base_dir if display_base_dir is not None else base_dir}\n"
+                        f"Total files (or chunks) processed: {len(files_data)}\n"
+                        f"Total approximate tokens: {total_tokens}\n\n"
+                    )
+                    f.write(header)
+                    relative_paths = [os.path.relpath(fd['path'], base_dir) for fd in files_data]
+                    tree = build_tree_from_paths(relative_paths)
+                    diagram_lines = render_tree(tree)
+                    f.write("File System Diagram:\n")
+                    f.write("---------------------\n")
+                    for line in diagram_lines:
+                        f.write(line + "\n")
+                    f.write("\n")
+                # Write each file section in the group.
+                for file_data in group:
+                    rel_path = os.path.relpath(file_data['path'], base_dir)
+                    relative_path = "./" + rel_path.replace("\\", "/")
+                    if "chunk_index" in file_data:
+                        # If it was chunked, display chunk info.
+                        if file_data['chunk_index'] > 1:
+                            file_header = (
+                                "--------------------------------------------------\n"
+                                f"File: {relative_path} (Chunk {file_data['chunk_index']} of {file_data['total_chunks']})\n"
+                                f"Approx. tokens: {file_data['tokens']}\n"
+                                "--------------------------------------------------\n"
+                            )
+                        else:
+                            file_header = (
+                                "--------------------------------------------------\n"
+                                f"File: {relative_path}\n"
+                                f"Approx. tokens: {file_data['tokens']}\n"
+                                "--------------------------------------------------\n"
+                            )
+                    else:
+                        file_header = (
+                            "--------------------------------------------------\n"
+                            f"File: {relative_path}\n"
+                            f"Approx. tokens: {file_data['tokens']}\n"
+                            "--------------------------------------------------\n"
+                        )
+                    f.write(file_header)
+                    f.write(file_data['content'])
+                    f.write("\n\n")
+            print(f"Output written to: {out_file}")
+        except Exception as e:
+            print(f"Error writing output file '{out_file}': {e}")
+            sys.exit(1)
+
+def clone_repo(repo_url: str, branch: Optional[str] = None) -> str:
+    """
+    Clone the Git repository (GitHub, GitLab, etc.) into a temporary directory.
+    If a branch is specified, clone that branch.
+    Returns the path to the temporary directory containing the cloned repository.
+    """
+    tmp_dir = tempfile.mkdtemp(prefix="git_repo_")
+    clone_cmd = ["git", "clone", "--depth", "1"]
+    if branch:
+        clone_cmd.extend(["--branch", branch])
+    clone_cmd.extend([repo_url, tmp_dir])
+    try:
+        print(f"Cloning repository {repo_url} into temporary directory...")
+        subprocess.check_call(clone_cmd)
+        return tmp_dir
+    except subprocess.CalledProcessError as e:
+        shutil.rmtree(tmp_dir)
+        raise RuntimeError(f"Error cloning repository: {e}")
+
+def extract_repo_name(repo_url: str) -> str:
+    """
+    Extract the repository name from the repository URL.
+    For example, from 'https://gitlab.com/antonbelev/beblob' it returns 'beblob'.
+    Removes any trailing '.git' if present.
+    """
+    name = repo_url.rstrip('/').split('/')[-1]
+    if name.endswith(".git"):
+        name = name[:-4]
+    return name
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Aggregate file contents into one or more files for LLM context."
+    )
+    # Add a version flag
+    parser.add_argument('--version', action='version', version='llm-fuse 0.1.0')
+    
+    # Local directory argument (positional) is ignored if --repo is provided.
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Local directory to scan. Defaults to current directory. Ignored if --repo is provided."
+    )
+    parser.add_argument(
+        "--include",
+        type=str,
+        help="Regex pattern to include files (applied to the full file path). For example: '.*\\.js$'"
+    )
+    parser.add_argument(
+        "--exclude",
+        type=str,
+        help="Regex pattern to exclude files (applied to the full file path). For example: '.*(test|spec)\\.js$'"
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="output.txt",
+        help="Output file name for the primary (first-chunk) output. Defaults to 'output.txt'."
+    )
+    parser.add_argument(
+        "--git",
+        action="store_true",
+        help="If set, only include Git-tracked files (if available)."
+    )
+    parser.add_argument(
+        "--repo",
+        type=str,
+        help="Git repository URL to clone and process (supports GitHub, GitLab, etc.)."
+    )
+    parser.add_argument(
+        "--branch",
+        type=str,
+        default=None,
+        help="Specify branch to clone from the repository (if not provided, the default branch is used)."
+    )
+    parser.add_argument(
+        "--max-tokens",
+        type=int,
+        default=None,
+        help="Maximum token threshold per chunk. Files exceeding this threshold will be split into manageable chunks."
+    )
+    args = parser.parse_args()
+
+    temp_repo = False
+    display_base_dir = None
+    if args.repo:
+        try:
+            repo_clone_dir = clone_repo(args.repo, args.branch)
+        except RuntimeError as e:
+            print(e)
+            sys.exit(1)
+        items = os.listdir(repo_clone_dir)
+        subdirs = [os.path.join(repo_clone_dir, item) for item in items if os.path.isdir(os.path.join(repo_clone_dir, item))]
+        if len(subdirs) == 1:
+            base_dir = os.path.normpath(os.path.abspath(subdirs[0]))
+        else:
+            base_dir = os.path.normpath(os.path.abspath(repo_clone_dir))
+        repo_name = extract_repo_name(args.repo)
+        display_base_dir = "./" + repo_name
+        print(f"Processing cloned repository: {display_base_dir}")
+        temp_repo = True
+    else:
+        directory = os.path.normpath(os.path.abspath(args.directory))
+        if not os.path.isdir(directory):
+            print(f"Error: The specified directory '{directory}' does not exist or is not accessible.")
+            sys.exit(1)
+        base_dir = directory
+        display_base_dir = base_dir
+        print(f"Scanning local directory: {base_dir}")
+
+    file_paths = collect_files(base_dir, args.include, args.exclude, args.git)
+    if not file_paths:
+        print("Error: No files found matching the specified criteria.")
+        sys.exit(1)
+    print(f"Found {len(file_paths)} files after filtering.")
+
+    files_data, total_tokens = process_files(file_paths, max_tokens=args.max_tokens)
+    print(f"Processed {len(files_data)} file sections. Total approximate tokens: {total_tokens}")
+
+    write_output_files(files_data, total_tokens, args.output, base_dir, display_base_dir)
+
+    if temp_repo:
+        try:
+            shutil.rmtree(os.path.dirname(base_dir) if base_dir != os.path.abspath(repo_clone_dir) else repo_clone_dir)
+            print(f"Cleaned up temporary repository directory: {repo_clone_dir}")
+        except Exception as e:
+            print(f"Error cleaning up temporary directory: {e}")
+
+if __name__ == "__main__":
+    main()
+
+
+--------------------------------------------------
+File: ./requirements.txt
+Approx. tokens: 25
+--------------------------------------------------
+# This project uses only Python standard library modules.
+# No external dependencies are required.
+
+
+--------------------------------------------------
+File: ./setup.py
+Approx. tokens: 211
+--------------------------------------------------
+from setuptools import setup, find_packages
+
+setup(
+    name="llm-fuse",
+    version="0.1.0",
+    description="Aggregate source files for LLM context generation",
+    author="Anton Belev",
+    author_email="youremail@example.com",
+    url="https://github.com/antonbelev/llm-fuse",
+    packages=find_packages(),  # This finds all packages in your project.
+    entry_points={
+        "console_scripts": [
+            # This creates a command named `llm-fuse` which points to the main() function
+            # in the main module of your package (adjust the module path as necessary).
+            "llm-fuse=llm_fuse.main:main",
+        ],
+    },
+    install_requires=[
+        # List any dependencies here, for example
+    ],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Operating System :: OS Independent",
+    ],
+)
+
+
+--------------------------------------------------
+File: ./tests/test_llm_fuse.py
+Approx. tokens: 1336
+--------------------------------------------------
+import os
+import tempfile
+import unittest
+import math
+import shutil
+
+# Import functions from your module. Adjust the import if your module path differs.
+from llm_fuse.main import (
+    approximate_token_count,
+    is_text_file,
+    collect_files,
+    process_files,
+    build_tree_from_paths,
+    render_tree,
+    write_output_files
+)
+
+class TestLLMFuse(unittest.TestCase):
+
+    def test_approximate_token_count(self):
+        # For 4 characters, token count should be 1; for 6 characters, it should be 2.
+        self.assertEqual(approximate_token_count("abcd"), 1)
+        self.assertEqual(approximate_token_count("abcdef"), 2)
+
+    def test_is_text_file_with_text(self):
+        # Create a temporary text file.
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as tf:
+            tf.write("Hello World")
+            filename = tf.name
+        try:
+            self.assertTrue(is_text_file(filename))
+        finally:
+            os.remove(filename)
+
+    def test_is_text_file_with_binary(self):
+        # Create a temporary binary file.
+        with tempfile.NamedTemporaryFile(mode="wb", delete=False) as tf:
+            tf.write(b"\x00\xFF\x00\xFF")
+            filename = tf.name
+        try:
+            self.assertFalse(is_text_file(filename))
+        finally:
+            os.remove(filename)
+
+    def test_collect_files_with_filters(self):
+        # Create a temporary directory with multiple files.
+        with tempfile.TemporaryDirectory() as temp_dir:
+            file_txt = os.path.join(temp_dir, "file1.txt")
+            file_log = os.path.join(temp_dir, "file2.log")
+            with open(file_txt, "w") as f:
+                f.write("content")
+            with open(file_log, "w") as f:
+                f.write("more content")
+            # Use include filter to only include .txt files.
+            files = collect_files(temp_dir, include_regex=r".*\.txt$", exclude_regex=None, git_only=False)
+            self.assertIn(file_txt, files)
+            self.assertNotIn(file_log, files)
+
+    def test_process_files_without_chunking(self):
+        # Create a temporary file that doesn't require chunking.
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as tf:
+            tf.write("abcd")  # 4 characters, token count = ceil(4/4) = 1
+            filename = tf.name
+        try:
+            files_data, total_tokens = process_files([filename], max_tokens=None)
+            self.assertEqual(len(files_data), 1)
+            self.assertEqual(total_tokens, 1)
+        finally:
+            os.remove(filename)
+
+    def test_process_files_with_chunking(self):
+        # Create a file with content long enough to require chunking.
+        content = "abcdefghij"  # 10 characters, token count = ceil(10/4) = 3
+        # Set max_tokens=1 so that the file will be split.
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as tf:
+            tf.write(content)
+            filename = tf.name
+        try:
+            files_data, total_tokens = process_files([filename], max_tokens=1)
+            # With max_tokens=1, maximum characters per chunk = 4.
+            # Expect chunks: "abcd", "efgh", "ij"
+            self.assertEqual(len(files_data), 3)
+            expected_tokens = (approximate_token_count("abcd") +
+                               approximate_token_count("efgh") +
+                               approximate_token_count("ij"))
+            self.assertEqual(total_tokens, expected_tokens)
+        finally:
+            os.remove(filename)
+
+    def test_build_tree_from_paths(self):
+        paths = ["dir1/file1.txt", "dir1/file2.txt", "dir2/file3.txt"]
+        tree = build_tree_from_paths(paths)
+        expected_tree = {
+            "dir1": {"file1.txt": None, "file2.txt": None},
+            "dir2": {"file3.txt": None}
+        }
+        self.assertEqual(tree, expected_tree)
+
+    def test_render_tree(self):
+        tree = {
+            "dir1": {"file1.txt": None, "file2.txt": None},
+            "dir2": {"file3.txt": None}
+        }
+        lines = render_tree(tree)
+        # Check that expected substrings are present in the output.
+        self.assertTrue(any("dir1" in line for line in lines))
+        self.assertTrue(any("file1.txt" in line for line in lines))
+        self.assertTrue(any("dir2" in line for line in lines))
+        self.assertTrue(any("file3.txt" in line for line in lines))
+
+    def test_write_output_files(self):
+        # Create a dummy files_data list.
+        files_data = [
+            {"path": "file1.txt", "content": "Hello", "tokens": 2},
+            {"path": "file2.txt", "content": "World", "tokens": 2, "chunk_index": 2, "total_chunks": 2}
+        ]
+        total_tokens = 4
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = os.path.join(temp_dir, "output.txt")
+            base_dir = temp_dir
+            display_base_dir = temp_dir
+            write_output_files(files_data, total_tokens, output_path, base_dir, display_base_dir)
+            with open(output_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            # Check that the header and file names appear in the output.
+            self.assertIn("LLM Fuse Aggregation Output", content)
+            self.assertIn("file1.txt", content)
+            self.assertIn("file2.txt", content)
+
+if __name__ == "__main__":
+    unittest.main()
+
+
