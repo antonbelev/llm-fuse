@@ -70,6 +70,13 @@ source ~/.zshrc
 Using pipx is recommended because it keeps the CLI application isolated from your system packages while still making the command available globally.
 
 ## Usage
+
+Too see all options run:
+
+```bash
+llm-fuse --help
+```
+
 ### Processing a Local Directory
 
 ```bash
