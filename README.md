@@ -47,7 +47,7 @@ This will install the command‑line tool `llm-fuse` into your user’s local bi
 
 ### Option 2: Installation with pipx (Recommended)
 
-pipx allows you to install and run Python CLI applications in isolated environments without interfering with your system Python. This is especially useful if you want the command to be available globally without activating a virtual environment.
+`pipx` allows you to install and run Python CLI applications in isolated environments without interfering with your system Python. This is especially useful if you want the command to be available globally without activating a virtual environment.
 
 1. Install pipx (if not already installed):
 
@@ -65,20 +65,20 @@ pipx install .
 
 pipx will create an isolated environment for the tool and install its CLI command. The command is typically named `llm-fuse` (as defined in the entry point).
 
-3. Ensure Your PATH is Set Up:
-pipx usually installs commands in `~/.local/bin`. To make sure this directory is in your PATH, add the following line to your shell configuration file (e.g., `~/.zshrc` or `~/.bash_profile`):
+3. Ensure Your `PATH` is Set Up (following instructions are For macOS zsh specific)
+   
+By default, pipx installs commands in `~/.local/bin`. To ensure this directory is included in your system's `PATH`, run:
 
 ```bash
-export PATH="$HOME/.local/bin:$PATH"
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
 ```
 
-Then reload your shell:
+This command does the following:
 
-```bash
-source ~/.zshrc
-```
+- Appends export `PATH="$HOME/.local/bin:$PATH"` to your `~/.zshrc` file.
+- Immediately applies the changes by running source `~/.zshrc`.
 
-Using pipx is recommended because it keeps the CLI application isolated from your system packages while still making the command available globally.
+Using `pipx` is recommended because it keeps the CLI application isolated from your system packages while still making the command available globally.
 
 ## Usage
 
